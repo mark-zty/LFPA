@@ -1,6 +1,4 @@
 import numpy as np
-import copy
-import networkx as nx
 from tqdm import trange
 
 class model_q:
