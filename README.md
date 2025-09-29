@@ -2,8 +2,7 @@
 
 This repository accompanies the manuscript:
 
-**Tingyu Zhao, Balázs Maga, Pierfrancesco Dionigi, Gergely Ódor, Kyle Soni, Anastasiya Salova, Bingjie Hao, Miklós Abért, István A. Kovács**  
-*Quantum Preferential Attachment*
+**Tingyu Zhao, Balázs Maga, Pierfrancesco Dionigi, Gergely Ódor, Kyle Soni, Anastasiya Salova, Bingjie Hao, Miklós Abért, István A. Kovács, **  *Quantum Preferential Attachment.*
 
 ---
 
