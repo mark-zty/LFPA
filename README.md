@@ -7,6 +7,6 @@ This repository accompanies the manuscript:
 ---
 
 ## Contents
-- **`model_ar.py`** – Efficient implementation for simulating $(\alpha, r)$ networks
-- **`model_quantum.py`** – Efficient implementation for simulating QPA networks
+- **`model_ar.py`** – Efficient implementation for simulating constant redirection networks, parameterized by $(\alpha, r)$
+- **`model_quantum.py`** – Efficient implementation for simulating QPA networks, parameterized by $\alpha$
 - **`Generate.ipynb`** – Demonstration notebook to generate simulation samples
