@@ -1,7 +1,8 @@
 
 __pycache__/
+.DS_Store
 
-quantum_results/
+LFPA_results/
 r0_results/
 r0.5_results/
 r1_results/

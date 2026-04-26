@@ -1,7 +1,7 @@
 import numpy as np
 from tqdm import trange
 
-class model_q:
+class model_LFPA:
     """
     Creates a preferential attachment graph object for the alpha variant of the k model, with the redirection probability r = d/(d+1).
 

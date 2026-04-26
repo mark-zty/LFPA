@@ -1,7 +1,7 @@
 import numpy as np
 from tqdm import trange
 
-class model_ar:
+class model_CR:
     """
     Creates a preferential attachment graph object for the alpha variant of the k model, with the option for changing the redirection probability r.
 
