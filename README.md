@@ -8,5 +8,5 @@ This repository accompanies the manuscript:
 
 ## Contents
 - **`model_CR.py`** – Efficient implementation for simulating constant redirection (CR) networks, parameterized by $(\alpha, r)$
-- **`model_quantum.py`** – Efficient implementation for simulating LFPA networks, parameterized by $\alpha$
+- **`model_LFPA.py`** – Efficient implementation for simulating LFPA networks, parameterized by $\alpha$
 - **`Generate.ipynb`** – Demonstration notebook to generate simulation samples
