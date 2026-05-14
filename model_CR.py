@@ -53,6 +53,10 @@ class model_CR:
         self.min_deg = min(self.deg_dist) if self.N > 0 else 0
         self.max_deg_nodes = set([i for i, d in enumerate(self.deg_dist) if d == self.max_deg])
         self.min_deg_nodes = set([i for i, d in enumerate(self.deg_dist) if d == self.min_deg])
+        self.max_deg_nodes_list = list(self.max_deg_nodes)
+        self.min_deg_nodes_list = list(self.min_deg_nodes)
+        self.max_deg_nodes_pos = {node: pos for pos, node in enumerate(self.max_deg_nodes_list)}
+        self.min_deg_nodes_pos = {node: pos for pos, node in enumerate(self.min_deg_nodes_list)}
         if not any(initial_weights): # no initial weights, weights determined by k^alpha
             if alpha == 1:
                 for i in range(self.N):
@@ -93,6 +97,36 @@ class model_CR:
                     counter -= 1
         self.alpha = alpha
 
+    def _add_max_deg_node(self, node):
+        if node not in self.max_deg_nodes_pos:
+            self.max_deg_nodes.add(node)
+            self.max_deg_nodes_pos[node] = len(self.max_deg_nodes_list)
+            self.max_deg_nodes_list.append(node)
+
+    def _remove_max_deg_node(self, node):
+        if node in self.max_deg_nodes_pos:
+            pos = self.max_deg_nodes_pos.pop(node)
+            last = self.max_deg_nodes_list.pop()
+            if node != last:
+                self.max_deg_nodes_list[pos] = last
+                self.max_deg_nodes_pos[last] = pos
+            self.max_deg_nodes.remove(node)
+
+    def _add_min_deg_node(self, node):
+        if node not in self.min_deg_nodes_pos:
+            self.min_deg_nodes.add(node)
+            self.min_deg_nodes_pos[node] = len(self.min_deg_nodes_list)
+            self.min_deg_nodes_list.append(node)
+
+    def _remove_min_deg_node(self, node):
+        if node in self.min_deg_nodes_pos:
+            pos = self.min_deg_nodes_pos.pop(node)
+            last = self.min_deg_nodes_list.pop()
+            if node != last:
+                self.min_deg_nodes_list[pos] = last
+                self.min_deg_nodes_pos[last] = pos
+            self.min_deg_nodes.remove(node)
+
     def increase_size(self, size,r:float=1.0, show_progress=True):
         range_func = trange if show_progress else range
         if self.alpha == 0:  # Targets remain the same (random attachment)
@@ -129,7 +163,7 @@ class model_CR:
         elif self.alpha is not None and (self.alpha == np.inf or self.alpha == float('inf')):
             for i in range_func(size - self.N):
                 # Efficiently choose node with largest degree
-                target_node = np.random.choice(list(self.max_deg_nodes))
+                target_node = self.max_deg_nodes_list[np.random.randint(0, len(self.max_deg_nodes_list))]
                 d = self.deg_dist[target_node]
                 r_value = r
                 if np.random.rand() < r_value:
@@ -146,22 +180,22 @@ class model_CR:
                 if self.deg_dist[chosen_node] > self.max_deg:
                     self.max_deg = self.deg_dist[chosen_node]
                     self.max_deg_nodes = {chosen_node}
+                    self.max_deg_nodes_list = [chosen_node]
+                    self.max_deg_nodes_pos = {chosen_node: 0}
                 elif self.deg_dist[chosen_node] == self.max_deg:
-                    self.max_deg_nodes.add(chosen_node)
-                else:
-                    prev_max = self.max_deg - 1
-                    if prev_max >= 0 and chosen_node in self.max_deg_nodes:
-                        self.max_deg_nodes.remove(chosen_node)
+                    self._add_max_deg_node(chosen_node)
                 if 1 > self.max_deg:
                     self.max_deg = 1
                     self.max_deg_nodes = {self.N}
+                    self.max_deg_nodes_list = [self.N]
+                    self.max_deg_nodes_pos = {self.N: 0}
                 elif 1 == self.max_deg:
-                    self.max_deg_nodes.add(self.N)
+                    self._add_max_deg_node(self.N)
                 self.N += 1
         elif self.alpha is not None and (self.alpha == -np.inf or self.alpha == float('-inf')):
             for i in range_func(size - self.N):
                 # Efficiently choose node with smallest degree
-                target_node = np.random.choice(list(self.min_deg_nodes))
+                target_node = self.min_deg_nodes_list[np.random.randint(0, len(self.min_deg_nodes_list))]
                 d = self.deg_dist[target_node]
                 r_value = r
                 if np.random.rand() < r_value:
@@ -170,25 +204,26 @@ class model_CR:
                     chosen_node = target_node
                 self.edge_list.append([chosen_node, self.N])
                 # Update degree and neighbors
+                old_deg = self.deg_dist[chosen_node]
                 self.deg_dist[chosen_node] += 1
                 self.deg_dist.append(1)
                 self.neighbors[chosen_node].append(self.N)
                 self.neighbors.append([chosen_node])
                 # Update min_deg and min_deg_nodes
-                if self.deg_dist[chosen_node] < self.min_deg:
-                    self.min_deg = self.deg_dist[chosen_node]
-                    self.min_deg_nodes = {chosen_node}
-                elif self.deg_dist[chosen_node] == self.min_deg:
-                    self.min_deg_nodes.add(chosen_node)
-                else:
-                    prev_min = self.min_deg + 1
-                    if prev_min >= 0 and chosen_node in self.min_deg_nodes:
-                        self.min_deg_nodes.remove(chosen_node)
+                if old_deg == self.min_deg:
+                    self._remove_min_deg_node(chosen_node)
                 if 1 < self.min_deg:
                     self.min_deg = 1
                     self.min_deg_nodes = {self.N}
+                    self.min_deg_nodes_list = [self.N]
+                    self.min_deg_nodes_pos = {self.N: 0}
                 elif 1 == self.min_deg:
-                    self.min_deg_nodes.add(self.N)
+                    self._add_min_deg_node(self.N)
+                if len(self.min_deg_nodes_list) == 0:
+                    self.min_deg = min(self.deg_dist)
+                    self.min_deg_nodes = set([j for j, d in enumerate(self.deg_dist) if d == self.min_deg])
+                    self.min_deg_nodes_list = list(self.min_deg_nodes)
+                    self.min_deg_nodes_pos = {node: pos for pos, node in enumerate(self.min_deg_nodes_list)}
                 self.N += 1
         else:  # Generic alpha case (optimized for small/large degrees)
             for i in range_func(size - self.N):
